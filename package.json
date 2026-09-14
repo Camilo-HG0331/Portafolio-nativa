@@ -1,0 +1,14 @@
+{
+  "name": "portafolio-nativa",
+  "version": "1.0.0",
+  "description": "Portafolio de Milena Hernández",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "echo 'No build step required for static site'",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
