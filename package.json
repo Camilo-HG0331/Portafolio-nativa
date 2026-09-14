@@ -9,7 +9,11 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "body-parser": "^2.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
+    "nodemailer": "^10.0.10",
     "tesseract.js": "^7.0.0"
   },
   "keywords": [],

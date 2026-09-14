@@ -50,61 +50,84 @@
                     <li><a href="#">Local</a></li>
                     <li><a href="#">Solidaridad</a></li>
                     <li><a href="#">Honestidad</a></li>
+                    <li style="margin-left: 20px;">
+                        <select id="category-filter" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc; font-family: 'Raleway', sans-serif;">
+                            <option value="all">Todas las categorías</option>
+                            <option value="tes">Tés</option>
+                            <option value="comida">Comida</option>
+                            <option value="miel">Miel</option>
+                            <option value="cuidado">Cuidado</option>
+                        </select>
+                    </li>
+                    <li style="margin-left: 10px;">
+                        <div style="position: relative;">
+                            <input type="text" id="product-search" placeholder="Buscar producto..." style="padding: 5px 10px 5px 30px; border-radius: 5px; border: 1px solid #ccc; font-family: 'Raleway', sans-serif; width: 200px;">
+                            <i class="fas fa-search" style="position: absolute; left: 10px; top: 9px; color: #888; font-size: 0.9em;"></i>
+                        </div>
+                    </li>
+
+                </ul>
                 </ul>
             </div>
             <div class="portfolio-content">
-                <div class="box">
+                <div class="box" data-name="granola artesanal" data-category="comida">
                     <a href="portfolio-1.html">
                         <img src="img/portfolio/1-green.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="miel de montaña" data-category="miel">
                     <a href="portfolio-2.html">
                         <img src="img/portfolio/2-blue.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="infusión relax" data-category="tes">
                     <a href="portfolio-3.html">
                         <img src="img/portfolio/3-green.png" alt="">
                     </a>
                 </div>
             </div>
             <div class="portfolio-content">
-                <div class="box">
+                <div class="box" data-name="miel vital con jengibre" data-category="miel">
                     <a href="portfolio-4.html">
                         <img src="img/portfolio/4-purple.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="infusión sueño nativo" data-category="tes">
                     <a href="portfolio-5.html">
                         <img src="img/portfolio/5-green.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="jabón natural de aloe vera" data-category="cuidado">
                     <a href="portfolio-6.html">
                         <img src="img/portfolio/6-purple.png" alt="">
                     </a>
                 </div>
             </div>
             <div class="portfolio-content">
-                <div class="box">
+                <div class="box" data-name="mermelada de frutos del bosque" data-category="comida">
                     <a href="portfolio-7.html">
                         <img src="img/portfolio/7-green.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="barra energética nativa" data-category="comida">
                     <a href="portfolio-8.html">
                         <img src="img/portfolio/8-blue.png" alt="">
                     </a>
                 </div>
-                <div class="box">
+                <div class="box" data-name="hierbas aromáticas nativa" data-category="tes">
                     <a href="portfolio-9.html">
                         <img src="img/portfolio/9-green.png" alt="">
                     </a>
                 </div>
             </div>
+        
+            <div id="other-products-section" style="display: none; clear: both; padding-top: 40px;">
+                <h2 style="text-align: center; color: var(--verde-bosque); margin-bottom: 20px; font-family: 'Raleway', sans-serif;">También podría interesarte</h2>
+                <div id="other-products-container" class="portfolio-content" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;"></div>
+            </div>
         </div>
     </section>
+
 
     <hr>
 
@@ -122,7 +145,67 @@
     </footer>
 
     <script src="js/cart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterSelect = document.getElementById('category-filter');
+            const searchInput = document.getElementById('product-search');
+            const otherSection = document.getElementById('other-products-section');
+            const otherContainer = document.getElementById('other-products-container');
+            
+            function filterProducts() {
+                const selected = filterSelect ? filterSelect.value : 'all';
+                const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                // Only select the original boxes, not the cloned ones
+                const boxes = document.querySelectorAll('#portfolio > .container > .portfolio-content > .box');
+                
+                let isFiltering = (selected !== 'all' || searchTerm !== '');
+                let otherProductsPool = [];
+                
+                boxes.forEach(box => {
+                    const category = box.getAttribute('data-category');
+                    const name = box.getAttribute('data-name') || '';
+                    
+                    const matchesCategory = (selected === 'all' || selected === category);
+                    const matchesSearch = (searchTerm === '' || name.includes(searchTerm));
+                    
+                    if (matchesCategory && matchesSearch) {
+                        box.style.display = 'block';
+                    } else {
+                        box.style.display = 'none';
+                        // Add to pool of other products if we are filtering
+                        if (isFiltering && (!matchesCategory || !matchesSearch)) {
+                            otherProductsPool.push(box);
+                        }
+                    }
+                });
+                
+                if (isFiltering && otherProductsPool.length > 0) {
+                    otherContainer.innerHTML = ''; // Clear previous
+                    // Shuffle pool and take up to 3
+                    const shuffled = otherProductsPool.sort(() => 0.5 - Math.random());
+                    const selectedOthers = shuffled.slice(0, 3);
+                    
+                    selectedOthers.forEach(b => {
+                        const clone = b.cloneNode(true);
+                        clone.style.display = 'block';
+                        clone.style.width = '300px'; // fixed width for horizontal display
+                        clone.style.float = 'none';
+                        otherContainer.appendChild(clone);
+                    });
+                    otherSection.style.display = 'block';
+                } else {
+                    otherSection.style.display = 'none';
+                    otherContainer.innerHTML = '';
+                }
+            }
+
+            if(filterSelect) filterSelect.addEventListener('change', filterProducts);
+            if(searchInput) searchInput.addEventListener('input', filterProducts);
+        });
+    </script>
 </body>
+
 
 
 

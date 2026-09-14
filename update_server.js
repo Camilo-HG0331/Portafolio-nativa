@@ -1,4 +1,6 @@
-require('dotenv').config();
+const fs = require('fs');
+
+const serverCode = `require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
@@ -17,39 +19,31 @@ app.post('/api/send-email', async (req, res) => {
     }
 
     try {
-        const user = process.env.EMAIL_USER || process.env.SMTP_USER;
-        const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
-
-        if (!user || !pass) {
-            console.error("Missing SMTP credentials");
-            return res.status(500).json({ success: false, error: 'Configuración de correo incompleta en el servidor.' });
-        }
-
         const transporter = nodemailer.createTransport({
             service: 'gmail', // You can change this or use SMTP host
             auth: {
-                user: user,
-                pass: pass
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
         
-        let itemsHtml = (cart || []).map(item => `<li>${item.quantity}x ${item.name} - $${(item.price * item.quantity).toLocaleString('es-CO')}</li>`).join('');
+        let itemsHtml = (cart || []).map(item => \`<li>\${item.quantity}x \${item.name} - $\${(item.price * item.quantity).toLocaleString('es-CO')}</li>\`).join('');
 
         const mailOptions = {
-            from: user || '"Nativa" <no-reply@nativa.com>',
+            from: process.env.EMAIL_USER || '"Nativa" <no-reply@nativa.com>',
             to: email,
             subject: 'Confirmación de tu pedido en Nativa',
-            html: `
+            html: \`
                 <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
-                    <h2 style="color: #4a7c59;">¡Gracias por tu compra, ${name || 'Cliente'}!</h2>
+                    <h2 style="color: #4a7c59;">¡Gracias por tu compra, \${name || 'Cliente'}!</h2>
                     <p>Hemos recibido tu pedido correctamente. A continuación, te mostramos el resumen:</p>
                     <ul style="background: #f4f4f4; padding: 20px; border-radius: 8px; list-style: none;">
-                        ${itemsHtml}
+                        \${itemsHtml}
                     </ul>
-                    <h3 style="color: #333;">Total a pagar: $${total.toLocaleString('es-CO')} COP</h3>
+                    <h3 style="color: #333;">Total a pagar: $\${total.toLocaleString('es-CO')} COP</h3>
                     <p>Gracias por apoyar el consumo responsable y los productos naturales.</p>
                 </div>
-            `
+            \`
         };
 
         await transporter.sendMail(mailOptions);
@@ -65,5 +59,22 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(\`Server running on http://0.0.0.0:\${PORT}\`);
 });
+`;
+
+fs.writeFileSync('server.js', serverCode);
+
+// Add IDs to checkout.html
+let checkout = fs.readFileSync('checkout.html', 'utf8');
+checkout = checkout.replace(
+    /<input type="text" placeholder="Escribe tu nombre completo">/,
+    '<input type="text" id="billing-name" placeholder="Escribe tu nombre completo">'
+);
+checkout = checkout.replace(
+    /<input type="email" placeholder="ejemplo@correo.com">/,
+    '<input type="email" id="billing-email" placeholder="ejemplo@correo.com">'
+);
+fs.writeFileSync('checkout.html', checkout);
+
+console.log("Updated server and checkout");
