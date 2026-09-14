@@ -9,6 +9,10 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2"
-  }
+    "express": "^4.19.2",
+    "tesseract.js": "^7.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
